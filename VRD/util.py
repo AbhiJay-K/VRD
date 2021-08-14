@@ -45,6 +45,7 @@ def temporal_bandpass_filter(data, fps, freq_min=0.833, freq_max=1, axis=0, ampl
     result *= amplification_factor
     return result
 
+
 def temporal_bandpass_filter_hp(data, fps, freq_min, freq_max, axis=0, amplification_factor=1):
     #print("Applying bandpass between " + str(freq_min) + " and " + str(freq_max) + " Hz")
     fft = scipy.fftpack.rfft(data, axis=axis)
@@ -75,6 +76,7 @@ def bandpass_filter(data, fps, freq_min, freq_max, axis=0):
     result[:] = scipy.fftpack.ifft(fft, axis=0)
     return result
 
+
 def colour_hist_eq(frame):
     img_yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV)
     # equalize the histogram of the Y channel
@@ -93,6 +95,7 @@ def high_pass(data, fps, freq_max, axis=0):
     result[:] = scipy.fftpack.ifft(fft, axis=0)
     return result
 
+
 def low_pass(data, fps, freq_min, axis=0):
     print("Applying hipass at ", str(freq_min), " Hz")
     fft = scipy.fftpack.rfft(data, axis=axis)
@@ -104,7 +107,8 @@ def low_pass(data, fps, freq_min, axis=0):
     result[:] = scipy.fftpack.ifft(fft, axis=0)
     return result
 
-def Contrast_and_Brightness(alpha, beta, img):
+
+def contrast_and_brightness(alpha, beta, img):
     blank = np.zeros(img.shape, img.dtype)
     # dst = alpha * img + (1-alpha) * blank + beta
     dst = cv2.addWeighted(img, alpha, blank, 1-alpha, beta)
@@ -124,6 +128,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5,amplification=1):
     y = lfilter(b, a, data)
     return y
 
+
 def Sort_Tuple(tup):
     # getting length of list of tuples
     lst = len(tup)
@@ -135,30 +140,6 @@ def Sort_Tuple(tup):
                 tup[j] = tup[j + 1]
                 tup[j + 1] = temp
     return tup
-
-
-def get_intesity_frequency(intensity_list,fps):
-    freqs = scipy.fftpack.fftfreq(len(intensity_list), d=1.0/fps)
-    fft = abs(scipy.fftpack.fft(intensity_list))
-    idx = numpy.argsort(freqs)
-    freqs = freqs[idx]
-    fft = fft[idx]
-    freqs = freqs[len(freqs) // 2 + 1:]
-    fft = fft[len(fft) // 2 + 1:]
-    full_fqftlist = []
-    for fq, ft in numpy.array(list(zip(freqs, fft))):
-        # if freq_min < fq <= freq_max:
-        #     fqftlist.append((fq, ft))
-        full_fqftlist.append((fq, ft))
-    if full_fqftlist.__len__() >= 1:
-        full_fqlist, full_fftlist = zip(*full_fqftlist)
-        if math.isnan(max(full_fftlist)) or max(full_fftlist) == 0.0:
-            intesity_max_fq = 0.0
-        else:
-            intesity_max_fq = full_fqlist[full_fftlist.index(max(full_fftlist))]
-    else:
-        intensity_max_fq = 0.0
-    return intesity_max_fq,max(full_fftlist)
 
 
 def eulerian_magnification_colour(vid_data, fps,freq_min_narrow, freq_max_narrow, amplification, pyramid_levels=3,skip_levels_at_top=1):
@@ -174,6 +155,7 @@ def eulerian_magnification_colour(vid_data, fps,freq_min_narrow, freq_max_narrow
         vid_pyramid_new.append(bandpassed)
     vid_data_c = collapse_g_video_pyramid(vid_pyramid_new)
     return vid_data_c
+
 
 def eulerian_magnification_butter(vid_data, fps,freq_min_narrow, freq_max_narrow, amplification, pyramid_levels=3,skip_levels_at_top=1):
     # vid_data_c = butter_bandpass_filter(vid_data, 0.6, 3, 50, order=5,amplification=1520)
@@ -197,6 +179,7 @@ def find_centers(vid_data):
         video[i] = uint8_to_float(frame)
         i = i + 1
     return video
+
 
 def center_of_contours(frame):
     # load the image, convert it to grayscale, blur it slightly,
@@ -229,6 +212,7 @@ def brightness(frame):
     g = frame[:, :, 1].sum()
     b = frame[:, :, 0].sum()
     return np.float64(math.sqrt(0.241 * (r ** 2) + 0.691 * (g ** 2) + 0.068 * (b ** 2)))
+
 
 def get_mad(fq_list, median):
     median_diff_list = []
