@@ -1,6 +1,7 @@
+import logging
 
 import numpy as np
-import scipy
+import scipy.fftpack
 from matplotlib import pyplot
 
 
@@ -26,14 +27,14 @@ def show_frequencies_plot(vid_data, fps, bounds=None,filename="output",folder_na
     pyplot.xlabel("Time (Sec)", weight='bold',fontsize=14)
     pyplot.ylabel("Intensity (Pixel value)", weight='bold',fontsize=14)
     time = np.arange(0, len(averages)/fps, 1 / fps)
-    print(len(averages) / fps)
-    print(len(time))
-    print(len(averages))
+    logging.debug(len(averages) / fps)
+    logging.debug(len(time))
+    logging.debug(len(averages))
     if len(time) > len(averages):
         time = time[0:len(averages)]
-    print(len(averages)/fps)
-    print(len(time))
-    print(len(averages))
+    logging.debug(len(averages)/fps)
+    logging.debug(len(time))
+    logging.debug(len(averages))
     pyplot.plot(time,averages,linewidth=1,color='k', ls='solid')
     freqs = scipy.fftpack.fftfreq(len(averages), d=1/fps)
     fft = abs(scipy.fftpack.fft(averages))

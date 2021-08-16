@@ -4,8 +4,8 @@ import numpy as np
 from cv2 import cv2
 from numpy import zeros
 
-from VRD.util import uint8_to_float, float_to_uint8, Contrast_and_Brightness, colour_hist_eq, \
-    eulerian_magnification_colour, find_centers
+from VRD.util import uint8_to_float, float_to_uint8, colour_hist_eq, \
+    eulerian_magnification_colour, find_centers, contrast_and_brightness
 from VRD.vrd_thread import VRDThread
 
 
@@ -15,7 +15,7 @@ def load_image(img_path):
     return uint8_to_float(img)
 
 
-def Obtain_ROI(video_filename, freq_min_narrow, freq_max_narrow, amplification,pyramid_levels):
+def obtain_roi(video_filename, freq_min_narrow, freq_max_narrow, amplification,pyramid_levels):
     """Load a video into a numpy array"""
     video_filename = str(video_filename)
     print("Loading " + video_filename)
@@ -114,7 +114,7 @@ def get_blue_frame(detectedSkin):
 
 
 def get_gray_frame(frame):
-    frame1 = Contrast_and_Brightness(1.3, 0.4, frame)
+    frame1 = contrast_and_brightness(1.3, 0.4, frame)
     return frame1
 
 
