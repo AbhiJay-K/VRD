@@ -32,12 +32,12 @@ def liveness_detection(row, freq_min, freq_max, amplification, pyramid_levels, r
     full_list_green = show_frequencies_plot(green_vid, fps, None, str(row[0]).split(".")[0] + "_green",
                                             result_folder_name)
     count = 1.0
-    max_list = get_max_frequency(full_list_green, str(row[0]).split(".")[0] + "_filtered", count)
+    max_list = get_max_frequency(full_list_green, str(row[0]).split(".")[0] + "_filtered", count,result_folder_name)
     prev_list = [max_list]
     sum_of_fq_count = 0.0
-    logging.debug("Continue ", count, max_list)
+    logging.debug("Continue : %s , max freq : %s ", str(count), str(max_list))
     while max_list[3] > 1:
-        logging.debug(max_list)
+        logging.debug(str(max_list))
         if max_list[0] == 0.0 and max_list[0] == 0.0:
             return check_frames(green_vid, row, count, prev_list)
         green_vid = eulerian_magnification_butter(green_vid, fps, max_list[0], max_list[1], max_list[2] * amplification,
@@ -45,12 +45,12 @@ def liveness_detection(row, freq_min, freq_max, amplification, pyramid_levels, r
         full_list_green = show_frequencies_plot(green_vid, fps, None,
                                                 str(row[0]).split(".")[0] + "_green_" + str(count),
                                                 result_folder_name)
-        max_list = get_max_frequency(full_list_green, str(row[0]).split(".")[0] + "_filtered_" + str(count), count)
+        max_list = get_max_frequency(full_list_green, str(row[0]).split(".")[0] + "_filtered_" + str(count), count,result_folder_name)
         count = count + 1.0
         if prev_list[len(prev_list) - 1][3] == max_list[3] or max_list[0] > 3.3:
             break
         prev_list.append(max_list)
-        logging.debug("Continue ", count, max_list)
+        logging.debug("Continue %s , max list : %s", str(count), str(max_list))
         sum_of_fq_count = sum_of_fq_count + max_list[3]
     return check_frames(green_vid, row, count, prev_list)
 
@@ -68,7 +68,7 @@ def check_frames(vid_green, row, count, max_list):
     low = max_list[len(max_list) - 2][0]
     high = max_list[len(max_list) - 2][1]
     mean_freq = (low + high) / 2.0
-    logging.debug("mean frequency : ", mean_freq)
+    logging.debug("mean frequency : %s", str(mean_freq))
     if result_green is not None:
         frequency = result_green[0][0]
         intesity_score = result_green[0][1]
@@ -103,7 +103,7 @@ def check_dark_vid(full_list_greem_motion):
 
 
 def get_max_frequency(full_list_c, filename, count, result_folder_name):
-    logging.debug("full list for ", count, "run >>>", full_list_c)
+    logging.debug("full list for "+ str(count)+ "run >>>"+ str(full_list_c))
     amp = 1
     try:
         if full_list_c.__len__() > 0:
@@ -113,18 +113,18 @@ def get_max_frequency(full_list_c, filename, count, result_folder_name):
                     amp = 1.0 / min(full_fftlist)
                 else:
                     amp = min(full_fftlist)
-                logging.debug("min fft:", min(full_fftlist))
-                logging.debug("amp:", amp)
+                logging.debug("min fft: %s", str(min(full_fftlist)))
+                logging.debug("amp: %s", str(amp))
                 fft_mean = statistics.mean(full_fftlist)
                 fft_std_dev = statistics.stdev(full_fftlist)
-                logging.debug(" fft mean and std dev >>>> ", fft_mean, fft_std_dev)
+                logging.debug(" fft mean and std dev >>>> %s , %s", str(fft_mean), str(fft_std_dev))
                 small_fq_list = []
                 small_fft_list = []
                 lesser_fq_list = []
                 lesser_fft_list = []
                 for fq, ft in full_list_c:
                     if (fft_mean + (2 * fft_std_dev)) <= ft < (fft_mean + (3 * fft_std_dev)):
-                        logging.debug("fft above ", (fft_mean + (3 * fft_std_dev)), " :>", ft)
+                        logging.debug("fft above "+ str((fft_mean + (3 * fft_std_dev)))+" :>"+ str(ft))
                         small_fq_list.append(fq)
                         small_fft_list.append(ft)
                     if ft >= (fft_mean + fft_std_dev):
@@ -133,29 +133,29 @@ def get_max_frequency(full_list_c, filename, count, result_folder_name):
                 if len(small_fft_list) == 0:
                     small_fq_list = lesser_fq_list.copy()
                     small_fft_list = lesser_fft_list.copy()
-                    logging.debug(len(small_fq_list))
+                    logging.debug(str(len(small_fq_list)))
                 if len(small_fq_list) > 2:
                     logging.debug("Ploting done")
                     fq_median = statistics.median(small_fq_list)
                     fq_mean = statistics.mean(small_fq_list)
                     fq_stddev = statistics.stdev(small_fq_list)
-                    logging.debug("median frquency:", fq_median)
+                    logging.debug("median frquency: %s", str(fq_median))
                     mad = get_mad(small_fq_list, fq_median)
-                    logging.debug(fq_median, mad)
+                    logging.debug("frequency median : " + str(fq_median) + " & frequency MAD : "+ str(mad))
                     if count == 1:
-                        logging.debug("mean : ", fq_mean, "std dev:", statistics.stdev(small_fq_list))
+                        logging.debug("mean : "+ str(fq_mean)+ "std dev:" +str(statistics.stdev(small_fq_list)))
                         if (fq_mean + fq_stddev) > 3.3:
                             low = (fq_median - mad) if (fq_median - mad) > 0 else min(small_fq_list)
                             high = (fq_median + mad)
                             plot_fq_fft(low, high, fft_mean, fq_median, fft_std_dev, filename,
                                         small_fq_list, small_fft_list, result_folder_name)
                             return [0, 0, amp, len(small_fq_list)]
-                    logging.debug("Length of small list : ", len(small_fq_list))
+                    logging.debug("Length of small list : %s", str(len(small_fq_list)))
                 else:
                     if len(small_fq_list) > 1:
                         unsorted_fq_list = small_fq_list.copy()
                         small_fq_list.sort()
-                        logging.debug("Small list : ", small_fq_list)
+                        logging.debug("Small list : %s", str(small_fq_list))
                         low = small_fq_list[0]
                         high = small_fq_list[1]
                         fq_median = statistics.median(small_fq_list)
@@ -193,16 +193,16 @@ def get_max_frequency(full_list_c, filename, count, result_folder_name):
 def get_freq(full_list_c):
     colour_max_fq = 0.0
     prom_fft = 0.0
-    logging.debug(full_list_c)
+    logging.debug(str(full_list_c))
     if full_list_c.__len__() > 0:
         full_fqlist, full_fftlist = zip(*full_list_c)
         fq_median = statistics.median(full_fqlist[len(full_fqlist) - 10:len(full_fqlist) - 1])
-        logging.debug("Median of frequency : ", fq_median)
+        logging.debug("Median of frequency : %s", str(fq_median))
         fq_mad = get_mad(full_fqlist[len(full_fqlist) - 10:len(full_fqlist) - 1], fq_median)
-        logging.debug("Median absolute deviation of frequency : ", fq_mad)
+        logging.debug("Median absolute deviation of frequency : %s", str(fq_mad))
         if len(full_fftlist) > 0:
             if 0.8 < full_fqlist[len(full_fqlist) - 1] < 3.3:
-                logging.debug("Highest Frequency : ", full_fqlist[len(full_fqlist) - 1])
+                logging.debug("Highest Frequency : %s", str(full_fqlist[len(full_fqlist) - 1]))
                 colour_max_fq = full_fqlist[len(full_fqlist) - 1]
                 prom_fft = 1
     return [colour_max_fq, prom_fft]

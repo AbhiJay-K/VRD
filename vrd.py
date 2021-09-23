@@ -6,6 +6,10 @@ from VRD.liveness_detection import liveness_detection
 long_options = ["help",
                 "output=", "verbose"]
 
+file_handler = logging.FileHandler('vrd.log')
+formatter    = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+file_handler.setFormatter(formatter)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-fmin", dest='frq_min', help="minimum frequency for wide temporal filtering",

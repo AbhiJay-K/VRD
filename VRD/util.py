@@ -218,10 +218,10 @@ def brightness(frame):
 def get_mad(fq_list, median):
     median_diff_list = []
     for item in fq_list:
-        logging.debug("Median diff :", abs(item - median))
+        logging.debug("Median diff : %s", str(abs(item - median)))
         median_diff_list.append(abs(item - median))
     if len(median_diff_list) > 0:
-        logging.debug("MAD median :", statistics.median(median_diff_list))
+        logging.debug("MAD median : %s", str(statistics.median(median_diff_list)))
         return statistics.median(median_diff_list)
     else:
         return 0.0
